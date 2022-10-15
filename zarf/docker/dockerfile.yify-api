@@ -5,8 +5,11 @@ WORKDIR /service
 COPY go.mod go.sum /service/
 RUN go mod download
 COPY . .
+# Build the admin binary.
+WORKDIR /service/app/tooling/admin
+RUN go build -ldflags "-X main.build=${BUILD_REF}"
+# Build the service binary.
 WORKDIR /service/app/services/yify
-RUN ls
 RUN go build -ldflags "-X main.build=${BUILD_REF}" -o yify-api
 
 # Run the Go Binary in Alpine.
@@ -15,6 +18,8 @@ ARG BUILD_DATE
 ARG BUILD_REF
 WORKDIR /app
 COPY --from=yify-api /service/app/services/yify/yify-api .
+COPY --from=yify-api /service/app/tooling/admin .
+
 CMD [ "./yify-api" ]
 LABEL org.openconainers.image.created="${BUILD_DATE}" \
     org.openconainers.image.title="yify-api" \

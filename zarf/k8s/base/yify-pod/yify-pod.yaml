@@ -20,6 +20,11 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       terminationGracePeriodSeconds: 60
+      initContainers:
+      # yify-api init container configuration
+      - name: init-migrate
+        image: yify-api-image
+        command: ['./admin']
       containers:
       - name: yify-api
         image: yify-api-image

@@ -1,3 +1,9 @@
+# =======================================================================================
+# Testing running system
+
+# Database Access
+# dblab --host 0.0.0.0 --user postgres --db postgres --pass postgres --ssl disable --port 5433 --driver postgres
+
 tidy:
 	go mod tidy
 	go mod vendor
@@ -9,6 +15,7 @@ run:
 # Building containers
 VERSION := 1.0
 
+all: yify-api
 # Give the dockerfile, args and tag.
 yify-api:
 	docker build \
@@ -43,3 +50,12 @@ kind-apply:
 	kustomize build zarf/k8s/kind/database-pod | kubectl apply -f -
 	kubectl wait --namespace=database-system --timeout=120s --for=condition=Available deployment/database-pod
 	kustomize build zarf/k8s/kind/yify-pod | kubectl apply -f -
+
+# apply the changes
+kind-update-apply: all kind-load kind-apply
+
+kind-restart:
+	kubectl rollout restart deploy yify-pod -n yify-system
+
+# Will build the image, load into the nodes and restart the sales
+kind-update: all kind-load kind-restart
