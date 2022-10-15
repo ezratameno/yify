@@ -29,9 +29,9 @@ func New() (*Client, error) {
 }
 
 // CollectMovies scarp the yify site.
-func (y *Client) CollectMovies() {
+func (y *Client) CollectMovies() []movie.Movie {
 	var wg sync.WaitGroup
-
+	var movies []movie.Movie
 	movieLinks, nextPage := y.getMovieLinkPerPage(HomePage)
 	ch := make(chan movie.Movie)
 	for {
@@ -45,18 +45,18 @@ func (y *Client) CollectMovies() {
 			case <-done:
 				break outer
 			case movie := <-ch:
-				fmt.Printf("%+v\n", movie)
+				movies = append(movies, movie)
 			}
 
 		}
 
-		if nextPage == "" {
+		if nextPage == "https://yts.mx/browse-movies/0/all/all/0/year/0/all?page=2" {
 			close(ch)
 			break
 		}
 		movieLinks, nextPage = y.getMovieLinkPerPage(nextPage)
-
 	}
+	return movies
 }
 
 func (y *Client) CollectMovieDetails(ch chan movie.Movie, done chan struct{}, wg *sync.WaitGroup, links []string) {

@@ -1,0 +1,23 @@
+# Build the GO Binary.
+FROM golang:1.18-alpine3.15 as yify-api
+ARG BUILD_REF
+WORKDIR /service
+COPY go.mod go.sum /service/
+RUN go mod download
+COPY . .
+WORKDIR /service/app/services/yify
+RUN ls
+RUN go build -ldflags "-X main.build=${BUILD_REF}" -o yify-api
+
+# Run the Go Binary in Alpine.
+FROM alpine:3.14
+ARG BUILD_DATE
+ARG BUILD_REF
+WORKDIR /app
+COPY --from=yify-api /service/app/services/yify/yify-api .
+CMD [ "./yify-api" ]
+LABEL org.openconainers.image.created="${BUILD_DATE}" \
+    org.openconainers.image.title="yify-api" \
+    org.openconainers.image.authors="Ezra Tameno" \
+    org.openconainers.image.revision="${BUILD_DATE}" \
+    org.openconainers.image.vendor="Ezra Tameno" \

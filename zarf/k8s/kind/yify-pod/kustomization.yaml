@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# the yaml we want to kustomize
+resources:
+- ../../base/yify-pod/
+
+# the patch we want to merge with the base configurations
+patchesStrategicMerge:
+- ./kind-yify-patch.yaml
+
+# if we see an image with this name it will replace it
+images:
+- name: yify-api-image
+  newName: yify-api
+  newTag: "1.0"

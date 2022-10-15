@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yify-pod # Base POD name
+  namespace: yify-system
+spec:
+  replicas: 1
+  # if the pod goes down then recreate it
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: yify # Selector for POD name search.
+  template:
+    metadata:
+      labels:
+        app: yify
+    spec:
+      containers:
+      - name: yify-api
+        image: yify-api-image
+        resources:
+        # start with 1 core and goes up to 2 cores if needed.
+        # meaning we can only run 2 goroutines in parallel.
+          limits:
+            cpu: "2000m" # Up to 2 full coers
+          requests:
+            cpu: "1000m" # Use 1 full cores

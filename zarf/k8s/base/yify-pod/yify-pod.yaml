@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: yify-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yify-pod # Base POD name
+  namespace: yify-system
+spec:
+  selector:
+    matchLabels:
+      app: yify # Selector for POD name search.
+  template:
+    metadata:
+      labels:
+        app: yify
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: yify-api
+        image: yify-api-image
+        ports:
+        # naming the ports
+        - name: yify-api
+          containerPort: 3000
+        - name: yify-api-debug
+          containerPort: 4000
+        # readiness probes mark the service available to accept traffic.
+        readinessProbe:
+          httpGet:
+            path: /debug/readiness
+            port: 4000
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 2
+        # liveness probes mark the service alive or dead (to be restarted).
+        livenessProbe:
+          httpGet:
+            path: /debug/liveness
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 2
+        env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: KUBERNETES_PODNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: KUBERNETES_NAMESPACE_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: KUBERNETES_NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yify-service
+  namespace: yify-system
+spec:
+  type: ClusterIP
+  selector:
+    app: yify
+  ports:
+  # targetPort - the port that the container expose.
+  # port - the port that the service bind on the outside.
+  - name: yify-api
+    port: 3000
+    targetPort: yify-api
+  - name: yify-api-debug
+    port: 4000
+    targetPort: yify-api-debug
