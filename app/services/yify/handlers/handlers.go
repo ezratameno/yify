@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/ezratameno/yify/app/services/yify/handlers/debug/checkgrp"
+	"github.com/ezratameno/yify/app/services/yify/handlers/v1/moviegrp"
+	"github.com/ezratameno/yify/business/core/movie"
 	"github.com/ezratameno/yify/business/web/mid"
 	"github.com/ezratameno/yify/foundation/web"
 	"github.com/jmoiron/sqlx"
@@ -78,4 +80,10 @@ func APIMux(cfg APIMuxConfig) *web.App {
 // v1 binds all the version 1 routes.
 func v1(app *web.App, cfg APIMuxConfig) {
 	const version = "v1"
+
+	mgh := moviegrp.Handlers{
+		Movie: movie.NewCore(cfg.Log, cfg.DB),
+	}
+
+	app.Handle(http.MethodGet, version, "/movies", mgh.GetMovies)
 }

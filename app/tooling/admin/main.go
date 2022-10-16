@@ -1,21 +1,25 @@
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
-	"os"
-	"time"
+	"strings"
+
+	coreMovie "github.com/ezratameno/yify/business/core/movie"
+	"github.com/ezratameno/yify/internal/yify"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ezratameno/yify/business/data/schema"
+	"github.com/ezratameno/yify/business/data/store/movie"
 	"github.com/ezratameno/yify/business/sys/database"
 )
 
 func main() {
-	err := migrate()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// err := migrate()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
 }
 
 func migrate() error {
@@ -35,13 +39,40 @@ func migrate() error {
 	}
 	defer db.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := schema.Migrate(ctx, db); err != nil {
+	if err := schema.Migrate(db); err != nil {
 		return fmt.Errorf("migrate database: %w", err)
 	}
-
 	fmt.Println("migrations complete")
+
+	core := coreMovie.NewCore(logrus.New().WithField("service", "admin"), db)
+	client, err := yify.New()
+	if err != nil {
+		return err
+	}
+	movies := client.CollectMovies()
+
+	for id, newMovie := range movies {
+		// marshell the download links
+		downloadLinks, err := json.Marshal(newMovie.DownloadLinks)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		nm := movie.NewMovie{
+			ID:            id,
+			Name:          newMovie.Name,
+			Categories:    strings.Join(newMovie.Categories, "/"),
+			ImageUrl:      newMovie.ImageUrl,
+			PageUrl:       newMovie.PageUrl,
+			Year:          newMovie.Year,
+			Description:   newMovie.Description,
+			DownloadLinks: string(downloadLinks),
+		}
+		nm, err = core.Create(nm)
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Println("seeding database completed")
 	return nil
 }

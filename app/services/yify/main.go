@@ -14,7 +14,6 @@ import (
 
 	"github.com/ezratameno/yify/app/services/yify/handlers"
 	"github.com/ezratameno/yify/business/sys/database"
-	"github.com/ezratameno/yify/internal/yify"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/automaxprocs/maxprocs"
 )
@@ -31,15 +30,7 @@ func main() {
 }
 
 func run(log *logrus.Entry) error {
-	client, err := yify.New()
-	if err != nil {
-		return err
-	}
-	movies := client.CollectMovies()
 
-	for _, movie := range movies {
-		log.Infof("movie: %s", movie.Name)
-	}
 	// ============================================================
 	// GOMAXPROCS
 

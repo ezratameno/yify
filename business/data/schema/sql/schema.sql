@@ -1,6 +1,6 @@
 -- Description: Create table movies
 CREATE TABLE movies (
-    id  INT,
+    id  SERIAL ,
     name TEXT,
     description TEXT,
     year TEXT,
