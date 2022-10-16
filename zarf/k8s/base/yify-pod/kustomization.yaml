@@ -3,3 +3,4 @@ kind: Kustomization
 # the yaml we want to kustomize
 resources:
   - ./yify-pod.yaml
+  - ./ingress.yaml

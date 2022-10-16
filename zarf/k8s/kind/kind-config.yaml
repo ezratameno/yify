@@ -8,6 +8,7 @@ nodes:
     kind: InitConfiguration
     nodeRegistration:
       kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
   # specific to kind to access this ports
   extraPortMappings:
   - containerPort: 5432
@@ -16,5 +17,7 @@ nodes:
     hostPort: 4000
   - containerPort: 3000
     hostPort: 3000
-  - containerPort: 9411
-    hostPort: 9411
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP

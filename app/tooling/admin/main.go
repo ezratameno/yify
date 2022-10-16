@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	coreMovie "github.com/ezratameno/yify/business/core/movie"
@@ -15,11 +16,11 @@ import (
 )
 
 func main() {
-	// err := migrate()
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
+	err := migrate()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func migrate() error {

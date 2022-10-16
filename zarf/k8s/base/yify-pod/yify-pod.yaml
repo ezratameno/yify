@@ -78,7 +78,7 @@ metadata:
   name: yify-service
   namespace: yify-system
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: yify
   ports:

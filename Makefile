@@ -8,8 +8,11 @@ tidy:
 	go mod tidy
 	go mod vendor
 
-run:
+run/service:
 	go run ./app/services/yify/
+
+run/desktop:
+	go run ./app/desktop/
 
 # =========================================================================================
 # Building containers
@@ -50,6 +53,8 @@ kind-apply:
 	kustomize build zarf/k8s/kind/database-pod | kubectl apply -f -
 	kubectl wait --namespace=database-system --timeout=120s --for=condition=Available deployment/database-pod
 	kustomize build zarf/k8s/kind/yify-pod | kubectl apply -f -
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml 
+	kubectl wait --namespace ingress-nginx  --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
 
 # apply the changes
 kind-update-apply: all kind-load kind-apply
