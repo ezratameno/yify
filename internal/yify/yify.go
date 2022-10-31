@@ -51,7 +51,7 @@ func (y *Client) CollectMovies() []movie.Movie {
 
 		}
 
-		if nextPage == "https://yts.mx/browse-movies/0/all/all/0/year/0/all?page=2" {
+		if nextPage == "" {
 			close(ch)
 			break
 		}

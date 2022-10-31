@@ -1,5 +1,5 @@
 -- Description: Create table movies
-CREATE TABLE movies (
+    CREATE TABLE IF NOT EXISTS movies (
     id  SERIAL ,
     name TEXT,
     description TEXT,
@@ -9,5 +9,6 @@ CREATE TABLE movies (
     downloadLinks Text,
     categories Text,
     PRIMARY KEY (id)
-);
+    );
+
 

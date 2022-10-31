@@ -46,11 +46,22 @@ func migrate() error {
 	fmt.Println("migrations complete")
 
 	core := coreMovie.NewCore(logrus.New().WithField("service", "admin"), db)
+
+	// ===================================
+	// fill the db only in case we don't have any data
+	movies, _ := core.GetMovies()
+	if len(movies) != 0 {
+		fmt.Println("Already have movies, not going to populate the db...")
+
+		return nil
+	}
+	// ====================================
+	// add movies data to the movies table
 	client, err := yify.New()
 	if err != nil {
 		return err
 	}
-	movies := client.CollectMovies()
+	movies = client.CollectMovies()
 
 	for id, newMovie := range movies {
 		// marshell the download links
